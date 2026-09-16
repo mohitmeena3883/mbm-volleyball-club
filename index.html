@@ -118,7 +118,7 @@
     :root[data-theme="dark"] .btn-a { color: #f87171; }
 
     .row-footer-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--card-border); }
-    .btn-sub-act { font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--card-border); background: var(--sub-card); color: var(--text-muted); cursor: pointer; font-weight: 600; }
+    .btn-sub-act { font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--card-border); background: var(--sub-card); color: var(--text-muted); cursor: pointer; font-weight: 600; }
     .btn-del { color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
 
     /* Admin Pending Requests Panel */
@@ -246,7 +246,7 @@
       <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
         <input type="text" id="newAdminName" placeholder="Admin/Player Name" />
         <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px;">
-          <input type="tel" id="newAdminPhone" placeholder="Mobile Number" />
+          <input type="tel" id="newAdminPhone" placeholder="Mobile Number (Unique ID)" />
           <input type="password" id="newAdminPass" placeholder="Set Password" />
           <button class="btn-action" style="background: var(--gold);" id="btnCreateAdmin">Grant</button>
         </div>
@@ -413,7 +413,7 @@
 <div class="modal-overlay" id="playerEditModal">
   <div class="modal">
     <div class="modal-head">
-      <h3 style="font-size:1.15rem; color: var(--primary);">Update Profile</h3>
+      <h3 style="font-size:1.15rem; color: var(--primary);">Update My Profile</h3>
       <button class="close-btn" onclick="closeAllModals()">&times;</button>
     </div>
 
@@ -451,16 +451,15 @@
     <div class="form-group">
       <label>Branch</label>
       <select id="selfEditBranch">
-        <option value="CSE">Computer Science (CSE)</option>
-        <option value="AIDS">Artificial Intelligence and data science (AIDS)</option>
-        <option value="IT">Information Tech (IT)</option>
-        <option value="ECE">Electronics Comunication (ECE)</option>
-        <option value="EE">Electrical (EE)</option>
+        <option value="CSE">Computer Science and Engineering (CSE)</option>
+        <option value="ECE">Electronics and Communication (ECE)</option>
+        <option value="AIDS">Artificial Intelligence and Data Science (AIDS)</option>
         <option value="EEE">Electrical and Electronics (EEE)</option>
-        <option value="ME">Mechanical (ME)</option>
+        <option value="EE">Electrical Engineering (EE)</option>
+        <option value="ME">Mechanical Engineering (ME)</option>
         <option value="CE">Civil Engineering (CE)</option>
-        <option value="PIE">Production & Ind. (PIE)</option>
         <option value="PETRO">Petrolium (PETRO)</option>
+        <option value="PIE">Production & Ind. (PIE)</option>
         <option value="Mining">Mining Engineering</option>
         <option value="Chem">Chemical Engineering</option>
         <option value="Other">Other Branch</option>
@@ -469,7 +468,7 @@
 
     <div class="form-group">
       <label>Change Password (Optional)</label>
-      <input type="password" id="selfEditNewPassword" placeholder="Leave blank to keep current password" />
+      <input type="password" id="selfEditNewPassword" placeholder="Leave empty to keep current password" />
     </div>
 
     <div class="modal-btn-row">
@@ -577,7 +576,7 @@
 
     <!-- Edit Profile Action (Only visible if the current user is the owner or an admin) -->
     <div id="mOwnerActionBox" style="display: none; margin-top: 14px; text-align: center;">
-      <button class="btn-action" style="width: 100%; background: #6366f1;" id="btnModalEditOwn">✏️ Edit My Profile</button>
+      <button class="btn-action" style="width: 100%; background: #6366f1;" id="btnModalEditOwn">✏️ Edit Profile</button>
     </div>
   </div>
 </div>
@@ -606,11 +605,13 @@
 
   const DEFAULT_LOGO = "volleyball logo.jpg";
 
+  // MASTER SUPER ADMIN CREDENTIALS (PHONE + PASSWORD ONLY)
   const SUPER_ADMIN_PHONE = "7877400351";
   const SUPER_ADMIN_PASSWORD = "Mohit*2007"; 
 
   let currentAuth = "NONE";
   let activeAdminName = "";
+  let activeAdminPhone = "";
   
   // Persistent Player Session ID
   let loggedInPlayerId = localStorage.getItem('mbm_player_id') || "";
@@ -722,7 +723,7 @@
 
     if (currentAuth === "SUPER_ADMIN") {
       rolePill.className = "role-pill role-super";
-      rolePill.innerText = "👑 Super Admin (Mohit)";
+      rolePill.innerText = "👑 Super Admin (Authorized)";
       btnLogin.innerText = "Admin Logout";
       btnLogin.classList.add("btn-logout");
       superAdminBox.style.display = "block";
@@ -737,7 +738,7 @@
     } else if (loggedInPlayerId) {
       const p = members.find(m => m.id === loggedInPlayerId);
       rolePill.className = "role-pill role-player-auth";
-      rolePill.innerText = p ? `🏐 ${p.name.split(' ')[0]}` : "🏐 Player Mode";
+      rolePill.innerText = p ? `🏐 Player: ${p.name.split(' ')[0]}` : "🏐 Player Mode";
       btnLogin.innerText = "Admin Login";
       btnLogin.classList.remove("btn-logout");
       superAdminBox.style.display = "none";
@@ -764,9 +765,11 @@
   function restoreSavedSession() {
     const savedAuth = localStorage.getItem('mbm_admin_auth');
     const savedName = localStorage.getItem('mbm_admin_name');
+    const savedPhone = localStorage.getItem('mbm_admin_phone');
     if (savedAuth && (savedAuth === "SUPER_ADMIN" || savedAuth === "ADMIN")) {
       currentAuth = savedAuth;
       activeAdminName = savedName || "Admin";
+      activeAdminPhone = savedPhone || "";
     }
     applyAuthUI();
   }
@@ -779,8 +782,10 @@
     } else {
       currentAuth = "NONE";
       activeAdminName = "";
+      activeAdminPhone = "";
       localStorage.removeItem('mbm_admin_auth');
       localStorage.removeItem('mbm_admin_name');
+      localStorage.removeItem('mbm_admin_phone');
       applyAuthUI();
       showToast("Admin logged out");
     }
@@ -790,23 +795,29 @@
     const phone = document.getElementById('adminPhoneInput').value.trim();
     const pass = document.getElementById('adminPasswordInput').value.trim();
 
-    if ((phone === SUPER_ADMIN_PHONE || phone === "admin" || phone === "9999") && pass === SUPER_ADMIN_PASSWORD) {
+    // STRICT MOBILE + PASSWORD CHECK FOR SUPER ADMIN
+    if (phone === SUPER_ADMIN_PHONE && pass === SUPER_ADMIN_PASSWORD) {
       currentAuth = "SUPER_ADMIN";
-      activeAdminName = "Mohit (Super Admin)";
+      activeAdminName = "Super Admin";
+      activeAdminPhone = phone;
       localStorage.setItem('mbm_admin_auth', "SUPER_ADMIN");
       localStorage.setItem('mbm_admin_name', activeAdminName);
+      localStorage.setItem('mbm_admin_phone', phone);
       closeAllModals();
       applyAuthUI();
-      showToast("Welcome Mohit! Super Admin session active 👑");
+      showToast("Super Admin access granted via phone verification 👑");
       return;
     }
 
-    const matched = adminsList.find(a => a.phone === phone && a.password === pass);
+    // SUB-ADMIN VERIFICATION (STRICT MOBILE + PASSWORD MATCH IN DATABASE)
+    const matched = adminsList.find(a => String(a.phone).trim() === phone && a.password === pass);
     if (matched) {
       currentAuth = "ADMIN";
       activeAdminName = matched.name;
+      activeAdminPhone = matched.phone;
       localStorage.setItem('mbm_admin_auth', "ADMIN");
       localStorage.setItem('mbm_admin_name', activeAdminName);
+      localStorage.setItem('mbm_admin_phone', matched.phone);
       closeAllModals();
       applyAuthUI();
       showToast(`Admin Access Granted: ${matched.name}`);
@@ -815,7 +826,7 @@
     }
   });
 
-  // Super Admin: Create Sub-Admin
+  // Super Admin: Create Sub-Admin (Mobile is the primary identifier)
   document.getElementById('btnCreateAdmin').addEventListener('click', async () => {
     if (currentAuth !== "SUPER_ADMIN") return;
     const name = document.getElementById('newAdminName').value.trim();
@@ -831,14 +842,14 @@
     document.getElementById('newAdminName').value = '';
     document.getElementById('newAdminPhone').value = '';
     document.getElementById('newAdminPass').value = '';
-    showToast(`Admin access granted to ${name}!`);
+    showToast(`Admin access granted to mobile: ${phone}`);
   });
 
-  window.revokeAdmin = async (id, name) => {
+  window.revokeAdmin = async (id, phone) => {
     if (currentAuth !== "SUPER_ADMIN") return;
-    if (confirm(`Revoke admin access for ${name}?`)) {
+    if (confirm(`Revoke admin access for mobile: ${phone}?`)) {
       await deleteDoc(doc(db, "admins", id));
-      showToast(`Access revoked for ${name}`);
+      showToast(`Admin revoked`);
     }
   };
 
@@ -854,15 +865,15 @@
       div.className = 'admin-sub-item';
       div.innerHTML = `
         <div>
-          <strong>${a.name}</strong> <span style="color:var(--text-muted); font-size:0.75rem;">(📱 ${a.phone} • 🔑 ${a.password})</span>
+          <strong>${a.name}</strong> <span style="color:var(--text-muted); font-size:0.75rem;">(📱 ${a.phone})</span>
         </div>
-        <button class="btn-sub-act btn-del" onclick="revokeAdmin('${a.id}', '${a.name}')">Revoke</button>
+        <button class="btn-sub-act btn-del" onclick="revokeAdmin('${a.id}', '${a.phone}')">Revoke</button>
       `;
       list.appendChild(div);
     });
   }
 
-  // ================= PLAYER REGISTRATION (PASSWORD PROTECTED) =================
+  // ================= PLAYER REGISTRATION =================
   btnOpenRegister.addEventListener('click', () => registerModal.style.display = 'flex');
 
   document.getElementById('btnSubmitRegistration').addEventListener('click', async () => {
@@ -971,31 +982,13 @@
     }
   };
 
-  // ================= SECURE PERSISTENT PLAYER SESSION & GLOBAL OPEN EDIT =================
-  window.openEditPlayerById = (playerId) => {
-    const p = members.find(m => m.id === playerId);
-    if (!p) return;
-
-    document.getElementById('selfEditId').value = p.id;
-    document.getElementById('selfEditName').value = p.name || '';
-    document.getElementById('selfEditJersey').value = p.jersey || '';
-    document.getElementById('selfEditYear').value = p.year || '1st';
-    document.getElementById('selfEditBranch').value = p.branch || 'CSE';
-    document.getElementById('selfEditNewPassword').value = '';
-    
-    selfEditDpBase64 = p.photo || '';
-    const dpImg = document.getElementById('selfDpPreview');
-    dpImg.src = p.photo || DEFAULT_LOGO;
-
-    playerEditModal.style.display = 'flex';
-  };
-
+  // ================= SECURE PERSISTENT PLAYER SESSION =================
   btnMyProfile.addEventListener('click', () => {
     if (loggedInPlayerId) {
       const player = members.find(m => m.id === loggedInPlayerId);
       if (player) {
         if (confirm(`You are logged in as "${player.name}".\n\nClick OK to Edit Profile.\nClick Cancel to Logout.`)) {
-          window.openEditPlayerById(player.id);
+          openEditModalForPlayer(player);
         } else {
           loggedInPlayerId = "";
           localStorage.removeItem('mbm_player_id');
@@ -1008,7 +1001,7 @@
     playerLoginModal.style.display = 'flex';
   });
 
-  // Verify Player Credentials
+  // Verify Player Credentials via Registered Mobile + Password
   document.getElementById('btnVerifyPlayerLogin').addEventListener('click', () => {
     const phone = document.getElementById('pAuthPhone').value.trim();
     const pass = document.getElementById('pAuthPassword').value.trim();
@@ -1018,18 +1011,33 @@
       return;
     }
 
-    const matched = members.find(m => m.phone === phone && (m.password === pass || (!m.password && pass === "123456")));
+    const matched = members.find(m => String(m.phone).trim() === phone && (m.password === pass || (!m.password && pass === "123456")));
     if (matched) {
       loggedInPlayerId = matched.id;
-      localStorage.setItem('mbm_player_id', matched.id); // Persistent session saved
+      localStorage.setItem('mbm_player_id', matched.id);
       closeAllModals();
       applyAuthUI();
-      window.openEditPlayerById(matched.id);
+      openEditModalForPlayer(matched);
       showToast(`Welcome back, ${matched.name}! Session saved ✨`);
     } else {
       showToast("❌ Mobile number ya Password galat hai!");
     }
   });
+
+  function openEditModalForPlayer(p) {
+    document.getElementById('selfEditId').value = p.id;
+    document.getElementById('selfEditName').value = p.name || '';
+    document.getElementById('selfEditJersey').value = p.jersey || '';
+    document.getElementById('selfEditYear').value = p.year || '1st';
+    document.getElementById('selfEditBranch').value = p.branch || 'CSE';
+    document.getElementById('selfEditNewPassword').value = '';
+    
+    selfEditDpBase64 = p.photo || '';
+    const dpImg = document.getElementById('selfDpPreview');
+    dpImg.src = p.photo || DEFAULT_LOGO;
+
+    playerEditModal.style.display = 'flex';
+  }
 
   // Save changes (Strict Authorization Check: Owner OR Admin)
   document.getElementById('btnSaveSelfEdit').addEventListener('click', async () => {
@@ -1076,9 +1084,10 @@
 
   // Edit from Details Popup
   document.getElementById('btnModalEditOwn').addEventListener('click', () => {
-    if (currentlyViewedPlayerId) {
+    const player = members.find(m => m.id === currentlyViewedPlayerId);
+    if (player) {
       statsModal.style.display = 'none';
-      window.openEditPlayerById(currentlyViewedPlayerId);
+      openEditModalForPlayer(player);
     }
   });
 
@@ -1161,11 +1170,22 @@
     });
   });
 
-  function getAdminTagHtml(playerName) {
-    const lower = playerName.toLowerCase().trim();
-    if (lower.includes("mohit")) return `<span class="tag-super-admin">👑 Admin</span>`;
-    const isSub = adminsList.some(a => a.name.toLowerCase().trim() === lower);
-    if (isSub) return `<span class="tag-admin">⚡ Admin</span>`;
+  // STRICT PHONE-NUMBER-BASED ADMIN BADGE CHECK (NO NAME MATCHING)
+  function getAdminTagHtml(playerPhone) {
+    if (!playerPhone) return '';
+    const cleanPhone = String(playerPhone).trim();
+
+    // 1. Check Super Admin Phone
+    if (cleanPhone === SUPER_ADMIN_PHONE) {
+      return `<span class="tag-super-admin">👑 Admin</span>`;
+    }
+
+    // 2. Check Sub-Admin Database List by Phone Number
+    const isSub = adminsList.some(a => String(a.phone).trim() === cleanPhone);
+    if (isSub) {
+      return `<span class="tag-admin">⚡ Admin</span>`;
+    }
+
     return '';
   }
 
@@ -1189,7 +1209,8 @@
         ? `<button class="status-btn ${isPresent ? 'btn-p' : 'btn-a'}" onclick="togglePlayer('${p.id}', '${p.name}')">${isPresent ? 'Present' : 'Absent'}</button>`
         : `<span class="status-btn ${isPresent ? 'btn-p' : 'btn-a'}">${isPresent ? 'Present' : 'Absent'}</span>`;
 
-      const adminTag = getAdminTagHtml(p.name);
+      // Badge assigned strictly by phone number
+      const adminTag = getAdminTagHtml(p.phone);
       const avatarSrc = p.photo ? p.photo : DEFAULT_LOGO;
       const avatarClass = p.photo ? "player-avatar" : "player-avatar-fallback";
 
@@ -1210,7 +1231,7 @@
         </div>
         ${isAnyAdmin ? `
           <div class="row-footer-actions">
-            <button class="btn-sub-act" onclick="openEditPlayerById('${p.id}')">✏️ Admin Edit</button>
+            <button class="btn-sub-act" onclick="openEditModalForPlayer(members.find(m=>m.id==='${p.id}'))">✏️ Admin Edit</button>
             <button class="btn-sub-act btn-del" onclick="openDeleteModal('${p.id}', '${p.name}')">🗑️ Remove</button>
           </div>
         ` : ''}
@@ -1260,7 +1281,8 @@
       else if (idx === 1) { rankBadge = '🥈'; rankClass = 'rank-2'; }
       else if (idx === 2) { rankBadge = '🥉'; rankClass = 'rank-3'; }
 
-      const adminTag = getAdminTagHtml(p.name);
+      // Badge assigned strictly by phone number
+      const adminTag = getAdminTagHtml(p.phone);
       const avatarSrc = p.photo ? p.photo : DEFAULT_LOGO;
 
       const div = document.createElement('div');
@@ -1356,7 +1378,6 @@
     document.getElementById('mName').innerText = p.name;
     document.getElementById('mMeta').innerText = `#${p.jersey || 'N/A'} • ${p.year || '1st'} Year • ${p.branch || 'CSE'}`;
     
-    // Details in modal
     document.getElementById('mDetailBranch').innerText = p.branch || 'CSE';
     document.getElementById('mDetailYear').innerText = `${p.year || '1st'} Year`;
     document.getElementById('mDetailJersey').innerText = `#${p.jersey || '-'}`;
@@ -1364,7 +1385,6 @@
     const mAvatar = document.getElementById('mAvatar');
     mAvatar.src = p.photo ? p.photo : DEFAULT_LOGO;
 
-    // Show "Edit My Profile" button ONLY if viewer is this player or an admin
     const isOwner = (loggedInPlayerId === p.id);
     const isAnyAdmin = currentAuth !== "NONE";
     const ownerActionBox = document.getElementById('mOwnerActionBox');
