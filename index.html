@@ -118,7 +118,7 @@
     :root[data-theme="dark"] .btn-a { color: #f87171; }
 
     .row-footer-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--card-border); }
-    .btn-sub-act { font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--card-border); background: var(--sub-card); color: var(--text-muted); cursor: pointer; font-weight: 600; }
+    .btn-sub-act { font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--card-border); background: var(--sub-card); color: var(--text-muted); cursor: pointer; font-weight: 600; }
     .btn-del { color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
 
     /* Admin Pending Requests Panel */
@@ -413,7 +413,7 @@
 <div class="modal-overlay" id="playerEditModal">
   <div class="modal">
     <div class="modal-head">
-      <h3 style="font-size:1.15rem; color: var(--primary);">Update My Profile</h3>
+      <h3 style="font-size:1.15rem; color: var(--primary);">Update Profile</h3>
       <button class="close-btn" onclick="closeAllModals()">&times;</button>
     </div>
 
@@ -451,15 +451,16 @@
     <div class="form-group">
       <label>Branch</label>
       <select id="selfEditBranch">
-        <option value="CSE">Computer Science and Engineering (CSE)</option>
-        <option value="ECE">Electronics and Communication (ECE)</option>
-        <option value="AIDS">Artificial Intelligence and Data Science (AIDS)</option>
+        <option value="CSE">Computer Science (CSE)</option>
+        <option value="AIDS">Artificial Intelligence and data science (AIDS)</option>
+        <option value="IT">Information Tech (IT)</option>
+        <option value="ECE">Electronics Comunication (ECE)</option>
+        <option value="EE">Electrical (EE)</option>
         <option value="EEE">Electrical and Electronics (EEE)</option>
-        <option value="EE">Electrical Engineering (EE)</option>
-        <option value="ME">Mechanical Engineering (ME)</option>
+        <option value="ME">Mechanical (ME)</option>
         <option value="CE">Civil Engineering (CE)</option>
-        <option value="PETRO">Petrolium (PETRO)</option>
         <option value="PIE">Production & Ind. (PIE)</option>
+        <option value="PETRO">Petrolium (PETRO)</option>
         <option value="Mining">Mining Engineering</option>
         <option value="Chem">Chemical Engineering</option>
         <option value="Other">Other Branch</option>
@@ -468,7 +469,7 @@
 
     <div class="form-group">
       <label>Change Password (Optional)</label>
-      <input type="password" id="selfEditNewPassword" placeholder="Leave empty to keep current password" />
+      <input type="password" id="selfEditNewPassword" placeholder="Leave blank to keep current password" />
     </div>
 
     <div class="modal-btn-row">
@@ -576,7 +577,7 @@
 
     <!-- Edit Profile Action (Only visible if the current user is the owner or an admin) -->
     <div id="mOwnerActionBox" style="display: none; margin-top: 14px; text-align: center;">
-      <button class="btn-action" style="width: 100%; background: #6366f1;" id="btnModalEditOwn">✏️ Edit Profile</button>
+      <button class="btn-action" style="width: 100%; background: #6366f1;" id="btnModalEditOwn">✏️ Edit My Profile</button>
     </div>
   </div>
 </div>
@@ -970,13 +971,31 @@
     }
   };
 
-  // ================= SECURE PERSISTENT PLAYER SESSION =================
+  // ================= SECURE PERSISTENT PLAYER SESSION & GLOBAL OPEN EDIT =================
+  window.openEditPlayerById = (playerId) => {
+    const p = members.find(m => m.id === playerId);
+    if (!p) return;
+
+    document.getElementById('selfEditId').value = p.id;
+    document.getElementById('selfEditName').value = p.name || '';
+    document.getElementById('selfEditJersey').value = p.jersey || '';
+    document.getElementById('selfEditYear').value = p.year || '1st';
+    document.getElementById('selfEditBranch').value = p.branch || 'CSE';
+    document.getElementById('selfEditNewPassword').value = '';
+    
+    selfEditDpBase64 = p.photo || '';
+    const dpImg = document.getElementById('selfDpPreview');
+    dpImg.src = p.photo || DEFAULT_LOGO;
+
+    playerEditModal.style.display = 'flex';
+  };
+
   btnMyProfile.addEventListener('click', () => {
     if (loggedInPlayerId) {
       const player = members.find(m => m.id === loggedInPlayerId);
       if (player) {
         if (confirm(`You are logged in as "${player.name}".\n\nClick OK to Edit Profile.\nClick Cancel to Logout.`)) {
-          openEditModalForPlayer(player);
+          window.openEditPlayerById(player.id);
         } else {
           loggedInPlayerId = "";
           localStorage.removeItem('mbm_player_id');
@@ -1005,27 +1024,12 @@
       localStorage.setItem('mbm_player_id', matched.id); // Persistent session saved
       closeAllModals();
       applyAuthUI();
-      openEditModalForPlayer(matched);
+      window.openEditPlayerById(matched.id);
       showToast(`Welcome back, ${matched.name}! Session saved ✨`);
     } else {
       showToast("❌ Mobile number ya Password galat hai!");
     }
   });
-
-  function openEditModalForPlayer(p) {
-    document.getElementById('selfEditId').value = p.id;
-    document.getElementById('selfEditName').value = p.name || '';
-    document.getElementById('selfEditJersey').value = p.jersey || '';
-    document.getElementById('selfEditYear').value = p.year || '1st';
-    document.getElementById('selfEditBranch').value = p.branch || 'CSE';
-    document.getElementById('selfEditNewPassword').value = '';
-    
-    selfEditDpBase64 = p.photo || '';
-    const dpImg = document.getElementById('selfDpPreview');
-    dpImg.src = p.photo || DEFAULT_LOGO;
-
-    playerEditModal.style.display = 'flex';
-  }
 
   // Save changes (Strict Authorization Check: Owner OR Admin)
   document.getElementById('btnSaveSelfEdit').addEventListener('click', async () => {
@@ -1072,10 +1076,9 @@
 
   // Edit from Details Popup
   document.getElementById('btnModalEditOwn').addEventListener('click', () => {
-    const player = members.find(m => m.id === currentlyViewedPlayerId);
-    if (player) {
+    if (currentlyViewedPlayerId) {
       statsModal.style.display = 'none';
-      openEditModalForPlayer(player);
+      window.openEditPlayerById(currentlyViewedPlayerId);
     }
   });
 
@@ -1207,7 +1210,7 @@
         </div>
         ${isAnyAdmin ? `
           <div class="row-footer-actions">
-            <button class="btn-sub-act" onclick="openEditModalForPlayer(members.find(m=>m.id==='${p.id}'))">✏️ Admin Edit</button>
+            <button class="btn-sub-act" onclick="openEditPlayerById('${p.id}')">✏️ Admin Edit</button>
             <button class="btn-sub-act btn-del" onclick="openDeleteModal('${p.id}', '${p.name}')">🗑️ Remove</button>
           </div>
         ` : ''}
