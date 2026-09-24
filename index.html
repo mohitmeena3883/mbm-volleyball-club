@@ -1485,9 +1485,9 @@
     statsModal.style.display = 'flex';
   };
 
-  // ================= MOBILE-FRIENDLY INSTANT PDF DOWNLOAD =================
-  function generatePrintablePdf(title, subtitle, headers, rows) {
-    showToast("⏳ Generating PDF, download starting...");
+  // ================= UNIVERSAL APP & BROWSER COMPATIBLE PDF EXPORT =================
+  async function generatePrintablePdf(title, subtitle, headers, rows) {
+    showToast("⏳ Generating report...");
 
     let headerHtml = headers.map(h => `<th style="border:1px solid #cbd5e1; padding:8px 6px; background:#f1f5f9; text-align:center; font-size:10px; text-transform:uppercase;">${h}</th>`).join('');
     let rowsHtml = rows.map((r, idx) => `
@@ -1496,13 +1496,16 @@
       </tr>
     `).join('');
 
-    // Hidden container for capturing exact clean PDF layout
+    // Hidden container for exact standard formatting
     const element = document.createElement('div');
+    element.style.position = 'absolute';
+    element.style.left = '-9999px';
+    element.style.top = '0';
+    element.style.width = '750px';
     element.style.padding = '20px';
     element.style.background = '#ffffff';
     element.style.color = '#0f172a';
     element.style.fontFamily = "'Segoe UI', Arial, sans-serif";
-    element.style.width = '750px'; // Fixed width so table never breaks or squeezes
 
     element.innerHTML = `
       <div style="text-align: center; margin-bottom: 16px; border-bottom: 2px solid #0284c7; padding-bottom: 10px;">
@@ -1532,16 +1535,42 @@
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Trigger direct file download
-    html2pdf().set(opt).from(element).save().then(() => {
-      document.body.removeChild(element);
-      closeAllModals();
-      showToast("✅ PDF downloaded successfully!");
-    }).catch(err => {
+    try {
+      // Worker create karke PDF blob generate karein
+      const worker = html2pdf().set(opt).from(element);
+      const pdfBlob = await worker.output('blob');
+
+      // Native Web Share API Check (Android/iOS Apps me sabse best kaam karta hai)
+      const pdfFile = new File([pdfBlob], safeFilename, { type: 'application/pdf' });
+      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        await navigator.share({
+          files: [pdfFile],
+          title: title,
+          text: `MBM Volleyball Club Report: ${title}`
+        });
+        showToast("✅ Report shared / saved!");
+      } else {
+        // Fallback: Direct Anchor Download
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = safeFilename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+        showToast("✅ PDF downloaded!");
+      }
+    } catch (err) {
       console.error(err);
-      document.body.removeChild(element);
-      showToast("❌ Error generating PDF");
-    });
+      // Extreme Fallback for locked WebViews: Save via html2pdf direct
+      html2pdf().set(opt).from(element).save();
+    } finally {
+      if (document.body.contains(element)) {
+        document.body.removeChild(element);
+      }
+      closeAllModals();
+    }
   }
   // Open PDF Modal (Leaderboard Bottom Button)
   btnOpenPdfModal.addEventListener('click', () => {
