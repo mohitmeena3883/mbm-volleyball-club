@@ -1,11 +1,18 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>MBM VOLLEYBALL CLUB</title>
+  
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MBM Volleyball" />
+  <link rel="apple-touch-icon" href="volleyball logo.jpg" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root[data-theme="dark"] {
@@ -23,6 +30,8 @@
       --badge-inactive: #450a0a;
       --sub-card: #0c1427;
       --gold: #f59e0b;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     :root[data-theme="light"] {
@@ -40,10 +49,12 @@
       --badge-inactive: #fee2e2;
       --sub-card: #f8fafc;
       --gold: #d97706;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; transition: background 0.25s, color 0.25s, border-color 0.25s; }
-    body { background: var(--bg); color: var(--text); padding: 14px; min-height: 100vh; display: flex; flex-direction: column; }
+    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; transition: background 0.25s, color 0.25s, border-color 0.25s; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text); padding: max(14px, var(--safe-top)) 14px max(20px, var(--safe-bottom)) 14px; min-height: 100vh; display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; }
     .container { max-width: 500px; margin: 0 auto; width: 100%; flex: 1; padding-bottom: 20px; }
 
     /* Top Nav */
@@ -79,7 +90,7 @@
     /* Cards */
     .card { background: var(--card-bg); border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--card-border); backdrop-filter: blur(10px); }
     .row-between { display: flex; justify-content: space-between; align-items: center; }
-    input, select, textarea { background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text); padding: 9px 12px; border-radius: 8px; outline: none; font-size: 0.85rem; width: 100%; font-family: inherit; }
+    input, select, textarea { background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text); padding: 9px 12px; border-radius: 8px; outline: none; font-size: 16px; width: 100%; font-family: inherit; }
     .btn-action { background: var(--success); color: #fff; font-weight: 700; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
 
     /* Stats Grid */
@@ -143,6 +154,10 @@
     .rank-3 { color: #b45309; }
     .lb-pct { font-size: 1.1rem; font-weight: 900; color: var(--success); }
 
+    /* PDF Buttons inside Modal */
+    .pdf-option-btn { width: 100%; text-align: left; background: var(--sub-card); border: 1px solid var(--card-border); color: var(--text); padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; }
+    .pdf-option-btn:hover { border-color: #e11d48; background: rgba(225, 29, 72, 0.08); }
+
     /* Modals */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
     .modal { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; width: 100%; max-width: 420px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); max-height: 90vh; overflow-y: auto; }
@@ -198,7 +213,7 @@
     </div>
   </div>
 
-  <!-- Role Status Bar -->
+  <!-- Role Status Bar (Clean Header) -->
   <div class="role-bar">
     <div class="role-pill" id="rolePill">👁️ Guest View</div>
     <div class="btn-group-top">
@@ -237,7 +252,7 @@
 
     <div class="card row-between">
       <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">Practice Session:</span>
-      <input type="date" id="sessionDate" style="max-width: 160px;" />
+      <input type="date" id="sessionDate" style="max-width: 170px;" />
     </div>
 
     <!-- SUPER ADMIN: MANAGE SUB-ADMINS -->
@@ -280,7 +295,21 @@
       <button class="tab-btn" id="lbWeekly">Weekly (7D)</button>
       <button class="tab-btn" id="lbMonthly">Monthly (30D)</button>
     </div>
+    
     <div class="player-list" id="leaderboardList"></div>
+
+    <!-- PDF EXPORT CARD AT THE BOTTOM OF LEADERBOARD -->
+    <div class="card" style="margin-top: 16px; text-align: center; border-color: rgba(225, 29, 72, 0.35);">
+      <div style="font-size: 0.9rem; font-weight: 800; color: #e11d48; margin-bottom: 4px;">
+        📑 Club Attendance & Performance Sheets
+      </div>
+      <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 12px;">
+        Daily, Weekly, Monthly aur Squad Directory ki printable PDF save karein.
+      </p>
+      <button class="btn-action" style="background: #e11d48; width: 100%; padding: 11px; font-size: 0.9rem;" id="btnOpenPdfModal">
+        📥 Export / Download PDF Reports
+      </button>
+    </div>
   </div>
 
   <!-- VIEW 3: NEWS & INFO SECTION -->
@@ -312,7 +341,47 @@
 
 <!-- ================= MODALS ================= -->
 
-<!-- 1. PLAYER SELF-REGISTRATION MODAL (WITH SECRET PASSWORD) -->
+<!-- 1. PDF DOWNLOAD CENTER MODAL -->
+<div class="modal-overlay" id="pdfModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 style="font-size:1.15rem; color: #e11d48; display:flex; align-items:center; gap:6px;">📑 Export PDF Reports</h3>
+      <button class="close-btn" onclick="closeAllModals()">&times;</button>
+    </div>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">Aap kaunsi report PDF format me download karna chahte hain:</p>
+    
+    <button class="pdf-option-btn" id="btnPdfDaily">
+      <span>📅 Current Date Attendance Report</span>
+      <span>⬇️</span>
+    </button>
+
+    <button class="pdf-option-btn" id="btnPdfWeekly">
+      <span>📊 Weekly Performance Sheet (Last 7 Days)</span>
+      <span>⬇️</span>
+    </button>
+    
+    <button class="pdf-option-btn" id="btnPdfMonthly">
+      <span>🗓️ Full Monthly Performance Sheet</span>
+      <span>⬇️</span>
+    </button>
+
+    <button class="pdf-option-btn" id="btnPdfLeaderboard">
+      <span>🏆 Overall Leaderboard Standings</span>
+      <span>⬇️</span>
+    </button>
+
+    <button class="pdf-option-btn" id="btnPdfRoster">
+      <span>👥 Complete Registered Squad Directory</span>
+      <span>⬇️</span>
+    </button>
+
+    <div class="modal-btn-row">
+      <button class="btn-full btn-cancel" onclick="closeAllModals()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. PLAYER SELF-REGISTRATION MODAL -->
 <div class="modal-overlay" id="registerModal">
   <div class="modal">
     <div class="modal-head">
@@ -386,7 +455,7 @@
   </div>
 </div>
 
-<!-- 2. PLAYER LOGIN MODAL (MOBILE + PASSWORD) -->
+<!-- 3. PLAYER LOGIN MODAL -->
 <div class="modal-overlay" id="playerLoginModal">
   <div class="modal">
     <div class="modal-head">
@@ -409,7 +478,7 @@
   </div>
 </div>
 
-<!-- 3. PLAYER SELF-EDIT PROFILE MODAL (PROTECTED) -->
+<!-- 4. PLAYER SELF-EDIT PROFILE MODAL -->
 <div class="modal-overlay" id="playerEditModal">
   <div class="modal">
     <div class="modal-head">
@@ -478,7 +547,7 @@
   </div>
 </div>
 
-<!-- 4. ADMIN LOGIN MODAL -->
+<!-- 5. ADMIN LOGIN MODAL -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal">
     <div class="modal-head">
@@ -500,7 +569,7 @@
   </div>
 </div>
 
-<!-- 5. DELETE CONFIRMATION MODAL -->
+<!-- 6. DELETE CONFIRMATION MODAL -->
 <div class="modal-overlay" id="deleteModal">
   <div class="modal" style="text-align: center;">
     <h3 style="font-size:1.1rem; color: var(--danger); margin-bottom: 8px;">Remove Player?</h3>
@@ -514,7 +583,7 @@
   </div>
 </div>
 
-<!-- 6. COMPLETE PLAYER DETAILS & STATS MODAL (PUBLIC VIEW, SECURE EDIT) -->
+<!-- 7. PLAYER STATS MODAL -->
 <div class="modal-overlay" id="statsModal">
   <div class="modal">
     <div class="modal-head">
@@ -528,7 +597,6 @@
       <button class="close-btn" onclick="closeAllModals()">&times;</button>
     </div>
 
-    <!-- Details Card (Visible to Everyone) -->
     <div style="background: var(--sub-card); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center;">
       <div>
         <div><strong>Branch:</strong> <span id="mDetailBranch" style="color:var(--primary); font-weight:700;">-</span></div>
@@ -540,7 +608,6 @@
       </div>
     </div>
 
-    <!-- Attendance Performance Charts -->
     <div class="chart-container">
       <svg class="chart-svg" width="130" height="130" viewBox="0 0 36 36">
         <path stroke="var(--sub-card)" stroke-width="3.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -574,7 +641,6 @@
       <small style="color: var(--text-muted); font-size: 0.7rem;" id="mMonthCount">0/0 days</small>
     </div>
 
-    <!-- Edit Profile Action (Only visible if the current user is the owner or an admin) -->
     <div id="mOwnerActionBox" style="display: none; margin-top: 14px; text-align: center;">
       <button class="btn-action" style="width: 100%; background: #6366f1;" id="btnModalEditOwn">✏️ Edit Profile</button>
     </div>
@@ -605,7 +671,7 @@
 
   const DEFAULT_LOGO = "volleyball logo.jpg";
 
-  // MASTER SUPER ADMIN CREDENTIALS (PHONE + PASSWORD ONLY)
+  // SUPER ADMIN PHONE & PASSWORD
   const SUPER_ADMIN_PHONE = "7877400351";
   const SUPER_ADMIN_PASSWORD = "Mohit*2007"; 
 
@@ -613,7 +679,6 @@
   let activeAdminName = "";
   let activeAdminPhone = "";
   
-  // Persistent Player Session ID
   let loggedInPlayerId = localStorage.getItem('mbm_player_id') || "";
 
   let members = [];
@@ -634,6 +699,7 @@
   const btnLogin = document.getElementById('btnLogin');
   const btnOpenRegister = document.getElementById('btnOpenRegister');
   const btnMyProfile = document.getElementById('btnMyProfile');
+  const btnOpenPdfModal = document.getElementById('btnOpenPdfModal');
   const superAdminBox = document.getElementById('superAdminBox');
   const adminRequestsBox = document.getElementById('adminRequestsBox');
   const requestsList = document.getElementById('requestsList');
@@ -650,6 +716,7 @@
   const toast = document.getElementById('toast');
 
   // Modals
+  const pdfModal = document.getElementById('pdfModal');
   const registerModal = document.getElementById('registerModal');
   const playerLoginModal = document.getElementById('playerLoginModal');
   const loginModal = document.getElementById('loginModal');
@@ -657,7 +724,9 @@
   const deleteModal = document.getElementById('deleteModal');
   const statsModal = document.getElementById('statsModal');
 
-  dateInput.value = new Date().toISOString().slice(0, 10);
+  if (dateInput) {
+    dateInput.value = new Date().toISOString().slice(0, 10);
+  }
 
   function showToast(msg) {
     toast.innerText = msg;
@@ -666,6 +735,7 @@
   }
 
   window.closeAllModals = () => {
+    pdfModal.style.display = 'none';
     registerModal.style.display = 'none';
     playerLoginModal.style.display = 'none';
     loginModal.style.display = 'none';
@@ -676,7 +746,7 @@
     document.getElementById('pAuthPassword').value = '';
   };
 
-  [registerModal, playerLoginModal, loginModal, playerEditModal, deleteModal, statsModal].forEach(m => {
+  [pdfModal, registerModal, playerLoginModal, loginModal, playerEditModal, deleteModal, statsModal].forEach(m => {
     m.addEventListener('click', (e) => { if (e.target === m) closeAllModals(); });
   });
 
@@ -717,7 +787,6 @@
     });
   });
 
-  // UI Role Badge & Button States
   function applyAuthUI() {
     const isAnyAdmin = currentAuth !== "NONE";
 
@@ -775,7 +844,6 @@
   }
   restoreSavedSession();
 
-  // Admin Login / Logout
   btnLogin.addEventListener('click', () => {
     if (currentAuth === "NONE") {
       loginModal.style.display = 'flex';
@@ -795,7 +863,6 @@
     const phone = document.getElementById('adminPhoneInput').value.trim();
     const pass = document.getElementById('adminPasswordInput').value.trim();
 
-    // STRICT MOBILE + PASSWORD CHECK FOR SUPER ADMIN
     if (phone === SUPER_ADMIN_PHONE && pass === SUPER_ADMIN_PASSWORD) {
       currentAuth = "SUPER_ADMIN";
       activeAdminName = "Super Admin";
@@ -809,7 +876,6 @@
       return;
     }
 
-    // SUB-ADMIN VERIFICATION (STRICT MOBILE + PASSWORD MATCH IN DATABASE)
     const matched = adminsList.find(a => String(a.phone).trim() === phone && a.password === pass);
     if (matched) {
       currentAuth = "ADMIN";
@@ -826,7 +892,6 @@
     }
   });
 
-  // Super Admin: Create Sub-Admin (Mobile is the primary identifier)
   document.getElementById('btnCreateAdmin').addEventListener('click', async () => {
     if (currentAuth !== "SUPER_ADMIN") return;
     const name = document.getElementById('newAdminName').value.trim();
@@ -988,7 +1053,7 @@
       const player = members.find(m => m.id === loggedInPlayerId);
       if (player) {
         if (confirm(`You are logged in as "${player.name}".\n\nClick OK to Edit Profile.\nClick Cancel to Logout.`)) {
-          openEditModalForPlayer(player);
+          window.openEditModalForPlayer(player);
         } else {
           loggedInPlayerId = "";
           localStorage.removeItem('mbm_player_id');
@@ -1001,7 +1066,6 @@
     playerLoginModal.style.display = 'flex';
   });
 
-  // Verify Player Credentials via Registered Mobile + Password
   document.getElementById('btnVerifyPlayerLogin').addEventListener('click', () => {
     const phone = document.getElementById('pAuthPhone').value.trim();
     const pass = document.getElementById('pAuthPassword').value.trim();
@@ -1017,14 +1081,15 @@
       localStorage.setItem('mbm_player_id', matched.id);
       closeAllModals();
       applyAuthUI();
-      openEditModalForPlayer(matched);
+      window.openEditModalForPlayer(matched);
       showToast(`Welcome back, ${matched.name}! Session saved ✨`);
     } else {
       showToast("❌ Mobile number ya Password galat hai!");
     }
   });
 
-  function openEditModalForPlayer(p) {
+  window.openEditModalForPlayer = (p) => {
+    if (!p) return;
     document.getElementById('selfEditId').value = p.id;
     document.getElementById('selfEditName').value = p.name || '';
     document.getElementById('selfEditJersey').value = p.jersey || '';
@@ -1037,9 +1102,8 @@
     dpImg.src = p.photo || DEFAULT_LOGO;
 
     playerEditModal.style.display = 'flex';
-  }
+  };
 
-  // Save changes (Strict Authorization Check: Owner OR Admin)
   document.getElementById('btnSaveSelfEdit').addEventListener('click', async () => {
     const id = document.getElementById('selfEditId').value;
     const isAnyAdmin = currentAuth !== "NONE";
@@ -1082,16 +1146,14 @@
     showToast("Profile & DP updated successfully! ✨");
   });
 
-  // Edit from Details Popup
   document.getElementById('btnModalEditOwn').addEventListener('click', () => {
     const player = members.find(m => m.id === currentlyViewedPlayerId);
     if (player) {
       statsModal.style.display = 'none';
-      openEditModalForPlayer(player);
+      window.openEditModalForPlayer(player);
     }
   });
 
-  // Admin Delete Player
   window.openDeleteModal = (id, name) => {
     if (currentAuth === "NONE") return;
     document.getElementById('deletePlayerId').value = id;
@@ -1119,12 +1181,15 @@
   onSnapshot(collection(db, "members"), (snap) => {
     members = [];
     snap.forEach(d => members.push({ id: d.id, ...d.data() }));
-    loadAttendance(dateInput.value);
+    const curDate = dateInput ? dateInput.value : new Date().toISOString().slice(0, 10);
+    loadAttendance(curDate);
     fetchAllHistory();
     applyAuthUI();
   });
 
-  dateInput.addEventListener('change', () => loadAttendance(dateInput.value));
+  if (dateInput) {
+    dateInput.addEventListener('change', () => loadAttendance(dateInput.value));
+  }
 
   async function loadAttendance(dateStr) {
     const snap = await getDoc(doc(db, "attendance", dateStr));
@@ -1145,7 +1210,7 @@
     attendanceMap[id] = nextStatus;
     renderRoster();
 
-    const dateStr = dateInput.value;
+    const dateStr = dateInput ? dateInput.value : new Date().toISOString().slice(0, 10);
     await setDoc(doc(db, "attendance", dateStr), { date: dateStr, records: attendanceMap }, { merge: true });
 
     await addDoc(collection(db, "activity"), {
@@ -1170,17 +1235,14 @@
     });
   });
 
-  // STRICT PHONE-NUMBER-BASED ADMIN BADGE CHECK (NO NAME MATCHING)
   function getAdminTagHtml(playerPhone) {
     if (!playerPhone) return '';
     const cleanPhone = String(playerPhone).trim();
 
-    // 1. Check Super Admin Phone
     if (cleanPhone === SUPER_ADMIN_PHONE) {
       return `<span class="tag-super-admin">👑 Admin</span>`;
     }
 
-    // 2. Check Sub-Admin Database List by Phone Number
     const isSub = adminsList.some(a => String(a.phone).trim() === cleanPhone);
     if (isSub) {
       return `<span class="tag-admin">⚡ Admin</span>`;
@@ -1189,7 +1251,6 @@
     return '';
   }
 
-  // Render Roster: Card tap opens complete player profile & performance stats
   function renderRoster() {
     const list = document.getElementById('playerList');
     list.innerHTML = '';
@@ -1209,7 +1270,6 @@
         ? `<button class="status-btn ${isPresent ? 'btn-p' : 'btn-a'}" onclick="togglePlayer('${p.id}', '${p.name}')">${isPresent ? 'Present' : 'Absent'}</button>`
         : `<span class="status-btn ${isPresent ? 'btn-p' : 'btn-a'}">${isPresent ? 'Present' : 'Absent'}</span>`;
 
-      // Badge assigned strictly by phone number
       const adminTag = getAdminTagHtml(p.phone);
       const avatarSrc = p.photo ? p.photo : DEFAULT_LOGO;
       const avatarClass = p.photo ? "player-avatar" : "player-avatar-fallback";
@@ -1254,7 +1314,7 @@
       return;
     }
 
-    const todayStr = dateInput.value;
+    const todayStr = dateInput ? dateInput.value : new Date().toISOString().slice(0, 10);
     const now = new Date(todayStr);
     const d7 = new Date(todayStr); d7.setDate(now.getDate() - 7);
     const d30 = new Date(todayStr); d30.setDate(now.getDate() - 30);
@@ -1281,7 +1341,6 @@
       else if (idx === 1) { rankBadge = '🥈'; rankClass = 'rank-2'; }
       else if (idx === 2) { rankBadge = '🥉'; rankClass = 'rank-3'; }
 
-      // Badge assigned strictly by phone number
       const adminTag = getAdminTagHtml(p.phone);
       const avatarSrc = p.photo ? p.photo : DEFAULT_LOGO;
 
@@ -1368,7 +1427,6 @@
     });
   });
 
-  // Open Details & Stats Modal (Public Read-Only, Conditional Edit)
   window.openVisualStats = (id) => {
     const p = members.find(m => m.id === id);
     if (!p) return;
@@ -1424,6 +1482,222 @@
 
     statsModal.style.display = 'flex';
   };
+
+  // ================= GENERAL PRINT / PDF HELPER (SAFE STRINGS) =================
+  function generatePrintablePdf(title, subtitle, headers, rows) {
+    const printWindow = window.open('', '_blank');
+    let headerHtml = headers.map(h => `<th style="border:1px solid #cbd5e1; padding:8px; background:#f1f5f9; text-align:center; font-size:11px; text-transform:uppercase;">${h}</th>`).join('');
+    let rowsHtml = rows.map(r => `<tr>${r.map(col => `<td style="border:1px solid #cbd5e1; padding:7px 10px; font-size:12px;">${col}</td>`).join('')}</tr>`).join('');
+
+    // Escaped closing tags to prevent browser HTML parser breakages
+    const cStyle = '<' + '/style>';
+    const cHead = '<' + '/head>';
+    const cBody = '<' + '/body>';
+    const cHtml = '<' + '/html>';
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${title}</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 24px; color: #111; }
+          .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #0284c7; padding-bottom: 12px; }
+          h1 { margin: 0; font-size: 20px; color: #0284c7; text-transform: uppercase; letter-spacing: 0.5px; }
+          p { margin: 4px 0; font-size: 13px; color: #555; }
+          table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+          tr:nth-child(even) { background-color: #f8fafc; }
+          .footer { margin-top: 25px; display: flex; justify-content: space-between; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+        ${cStyle}
+      ${cHead}
+      <body>
+        <div class="header">
+          <h1>MBM VOLLEYBALL CLUB, JODHPUR</h1>
+          <p><strong>${title}</strong></p>
+          <p>${subtitle}</p>
+        </div>
+        <table>
+          <thead><tr>${headerHtml}</tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="footer">
+          <div>Report Generated: ${new Date().toLocaleString('en-IN')}</div>
+          <div>Authorized Signature: <strong>Mohit Kumar Mina</strong></div>
+        </div>
+      ${cBody}
+      ${cHtml}
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => printWindow.print(), 500);
+  }
+
+  // Open PDF Modal (Leaderboard Bottom Button)
+  btnOpenPdfModal.addEventListener('click', () => {
+    pdfModal.style.display = 'flex';
+  });
+
+  // 1. Daily Attendance PDF
+  document.getElementById('btnPdfDaily').addEventListener('click', () => {
+    const curDate = dateInput ? dateInput.value : new Date().toISOString().slice(0, 10);
+    if (members.length === 0) { showToast("No players found"); return; }
+    
+    let rows = members.map((p, idx) => {
+      const isP = !!attendanceMap[p.id];
+      const statusHtml = isP 
+        ? `<strong style="color:#16a34a;">PRESENT</strong>` 
+        : `<span style="color:#dc2626;">ABSENT</span>`;
+      return [
+        `<div style="text-align:center;">${idx + 1}</div>`,
+        `<strong>${p.name}</strong>`,
+        `<div style="text-align:center;">#${p.jersey || '-'}</div>`,
+        `<div style="text-align:center;">${p.year || '1st'} Yr (${p.branch || 'CSE'})</div>`,
+        `<div style="text-align:center;">${p.phone || '-'}</div>`,
+        `<div style="text-align:center;">${statusHtml}</div>`
+      ];
+    });
+
+    generatePrintablePdf(
+      `Daily Attendance Report (${curDate})`,
+      `Session Date: <strong>${curDate}</strong> | Total Squad Size: <strong>${members.length} Players</strong>`,
+      ["S.No", "Player Name", "Jersey #", "Batch / Branch", "Contact", "Attendance Status"],
+      rows
+    );
+  });
+
+  // 2. Weekly Attendance PDF (Last 7 Days)
+  document.getElementById('btnPdfWeekly').addEventListener('click', () => {
+    const curDateStr = dateInput ? dateInput.value : new Date().toISOString().slice(0, 10);
+    const now = new Date(curDateStr);
+    const d7 = new Date(curDateStr);
+    d7.setDate(now.getDate() - 7);
+
+    const wDocs = historyDocs.filter(h => {
+      const d = new Date(h.date);
+      return d >= d7 && d <= now;
+    });
+
+    const totalDays = wDocs.length;
+    if (totalDays === 0) { showToast("⚠️ Last 7 days me koi practice session nahi mila!"); return; }
+
+    let report = members.map(m => {
+      let count = 0;
+      wDocs.forEach(d => { if (d.records && d.records[m.id]) count++; });
+      const pct = Math.round((count / totalDays) * 100);
+      return { ...m, count, pct };
+    });
+
+    report.sort((a, b) => b.count - a.count);
+
+    let rows = report.map((p, idx) => [
+      `<div style="text-align:center;">${idx + 1}</div>`,
+      `<strong>${p.name}</strong>`,
+      `<div style="text-align:center;">#${p.jersey || '-'}</div>`,
+      `<div style="text-align:center;">${p.year || '1st'} Yr (${p.branch || 'CSE'})</div>`,
+      `<div style="text-align:center;">${p.count} / ${totalDays} Sessions</div>`,
+      `<div style="text-align:center; font-weight:bold; color:${p.pct >= 75 ? '#16a34a' : '#dc2626'};">${p.pct}%</div>`
+    ]);
+
+    generatePrintablePdf(
+      `Weekly Attendance Performance Sheet`,
+      `Period: <strong>${d7.toLocaleDateString('en-IN')} to ${now.toLocaleDateString('en-IN')}</strong> | Total Sessions Held: <strong>${totalDays} Days</strong>`,
+      ["Rank", "Player Name", "Jersey #", "Batch & Branch", "Sessions Attended", "Attendance %"],
+      rows
+    );
+  });
+
+  // 3. Full Monthly Performance PDF
+  document.getElementById('btnPdfMonthly').addEventListener('click', () => {
+    const selDate = new Date(dateInput ? dateInput.value : new Date());
+    const mMonth = selDate.getMonth();
+    const mYear = selDate.getFullYear();
+    const mName = selDate.toLocaleString('default', { month: 'long' });
+
+    const mDocs = historyDocs.filter(h => {
+      const d = new Date(h.date);
+      return d.getMonth() === mMonth && d.getFullYear() === mYear;
+    });
+
+    const totalDays = mDocs.length;
+    if (totalDays === 0) { showToast(`⚠️ No records found for ${mName} ${mYear}`); return; }
+
+    let report = members.map(m => {
+      let count = 0;
+      mDocs.forEach(d => { if (d.records && d.records[m.id]) count++; });
+      const pct = Math.round((count / totalDays) * 100);
+      return { ...m, count, pct };
+    });
+
+    report.sort((a, b) => b.count - a.count);
+
+    let rows = report.map((p, idx) => [
+      `<div style="text-align:center;">${idx + 1}</div>`,
+      `<strong>${p.name}</strong>`,
+      `<div style="text-align:center;">#${p.jersey || '-'}</div>`,
+      `<div style="text-align:center;">${p.year || '1st'} Yr (${p.branch || 'CSE'})</div>`,
+      `<div style="text-align:center;">${p.count} / ${totalDays} Days</div>`,
+      `<div style="text-align:center; font-weight:bold; color:${p.pct >= 75 ? '#16a34a' : '#dc2626'};">${p.pct}%</div>`
+    ]);
+
+    generatePrintablePdf(
+      `Monthly Attendance Performance Sheet`,
+      `Month: <strong>${mName} ${mYear}</strong> | Total Practice Sessions Held: <strong>${totalDays} Days</strong>`,
+      ["Rank", "Player Name", "Jersey #", "Batch & Branch", "Sessions Attended", "Attendance %"],
+      rows
+    );
+  });
+
+  // 4. Leaderboard Standings PDF
+  document.getElementById('btnPdfLeaderboard').addEventListener('click', () => {
+    const totalSessions = historyDocs.length;
+    if (totalSessions === 0) { showToast("No attendance sessions recorded yet"); return; }
+
+    let lbData = members.map(m => {
+      let attended = 0;
+      historyDocs.forEach(d => { if (d.records && d.records[m.id]) attended++; });
+      const pct = Math.round((attended / totalSessions) * 100);
+      return { ...m, attended, pct };
+    });
+
+    lbData.sort((a, b) => b.attended - a.attended || b.pct - a.pct);
+
+    let rows = lbData.map((p, idx) => [
+      `<div style="text-align:center;">#${idx + 1}</div>`,
+      `<strong>${p.name}</strong>`,
+      `<div style="text-align:center;">#${p.jersey || '-'}</div>`,
+      `<div style="text-align:center;">${p.year || '1st'} Yr (${p.branch || 'CSE'})</div>`,
+      `<div style="text-align:center;">${p.attended} / ${totalSessions}</div>`,
+      `<div style="text-align:center; font-weight:bold; color:#16a34a;">${p.pct}%</div>`
+    ]);
+
+    generatePrintablePdf(
+      `Official Club Leaderboard Standings`,
+      `All-Time Session Record | Total Court Days: <strong>${totalSessions}</strong>`,
+      ["Rank", "Player Name", "Jersey #", "Batch / Branch", "Total Present", "Attendance %"],
+      rows
+    );
+  });
+
+  // 5. Complete Squad Directory PDF
+  document.getElementById('btnPdfRoster').addEventListener('click', () => {
+    if (members.length === 0) { showToast("No players registered"); return; }
+
+    let rows = members.map((p, idx) => [
+      `<div style="text-align:center;">${idx + 1}</div>`,
+      `<strong>${p.name}</strong>`,
+      `<div style="text-align:center;">#${p.jersey || '-'}</div>`,
+      `<div style="text-align:center;">${p.year || '1st'} Year</div>`,
+      `<div style="text-align:center;">${p.branch || 'CSE'}</div>`,
+      `<div style="text-align:center;">${p.phone || '-'}</div>`
+    ]);
+
+    generatePrintablePdf(
+      `Registered Squad & Player Directory`,
+      `MBM Volleyball Club Active Member Roster | Total Members: <strong>${members.length}</strong>`,
+      ["S.No", "Player Name", "Jersey #", "Batch", "Branch", "WhatsApp / Contact"],
+      rows
+    );
+  });
 
   // Theme Handling
   const savedTheme = localStorage.getItem('mbm_theme') || 'dark';
